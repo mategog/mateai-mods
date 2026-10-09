@@ -1,0 +1,12 @@
+{
+  "name": "mateai-mods",
+  "description": "Small Claude Code mods from the MateAI channel.",
+  "owner": { "name": "MateAI" },
+  "plugins": [
+    {
+      "name": "cost-band",
+      "source": "./plugins/cost-band",
+      "description": "Band above the prompt with the last turn's and the session's list-price cost estimate."
+    }
+  ]
+}
