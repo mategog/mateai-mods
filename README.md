@@ -1,6 +1,19 @@
 # mateai-mods
 
-Small Claude Code mods from the [MateAI](https://www.youtube.com/@cryptomate9259) channel.
+Small Claude Code mods and skills from the [MateAI](https://www.youtube.com/@cryptomate9259) channel.
+
+## Plugins
+
+| Plugin | What it does | Install |
+|---|---|---|
+| [`cost-band`](#cost-band) | Band above the prompt showing the last turn's and the session's list-price cost estimate. | `claude plugin install cost-band@mateai-mods` |
+| [`delegate`](#delegate) | Plan a coding task on Opus, hand the implementation to Sonnet subagents, then review and verify their work. | `claude plugin install delegate@mateai-mods` |
+
+Add the marketplace once, then install whichever plugins you want. Each one installs independently:
+
+```bash
+claude plugin marketplace add mategog/mateai-mods
+```
 
 ## cost-band
 
