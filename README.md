@@ -79,6 +79,65 @@ plugins/cost-band/                   the plugin
   types/index.d.ts
 ```
 
+## delegate
+
+A skill, not a mod: it runs no code of its own. You run it in an Opus session. Opus researches and plans the task, then hands the implementation to Sonnet subagents and reviews what they wrote. **Experimental (v0.1.0).**
+
+```
+/delegate:delegate add pagination to the orders API and cover it with tests
+```
+
+It is only ever run by you typing the command; Claude will not start it on its own.
+
+### What it does
+
+- **Decides whether to delegate at all.** It delegates only for 2+ independent tasks or one bulk mechanical change. Otherwise Opus does the work itself and says why.
+- **Plans before spawning.** Each task gets an exact file list and a verification command. Shared interfaces are written first so parallel agents don't guess each other's signatures. At most 5 subagents.
+- **Picks the model per task.** Sonnet by default, Opus for subtle or high-risk tasks, Haiku only for trivial mechanical edits.
+- **Keeps subagents on a short leash.** They can't commit, push or deploy, they only run narrow checks on their own files, and they report "blocked" instead of redesigning.
+- **Reviews the result.** Opus reads every diff, checks that each subagent stayed inside its files, runs the full verification once, and uses `code-review` for risky changes. Max 2 correction rounds per task, then Opus takes over.
+
+### Requirements
+
+- Claude Code with the Agent tool (subagents). It does not work in plain chat.
+- A session running an Opus-class model. On anything else it warns you and asks before continuing.
+- Optional: the `anthropic-skills:karpathy-guidelines` and `code-review` skills. Without them it applies the same rules inline.
+
+### Install
+
+It installs independently of `cost-band`:
+
+```bash
+claude plugin marketplace add mategog/mateai-mods
+claude plugin install delegate@mateai-mods
+```
+
+Or inside a Claude Code session:
+
+```
+/plugin marketplace add mategog/mateai-mods
+/plugin install delegate@mateai-mods
+```
+
+### Update and remove
+
+```bash
+claude plugin marketplace update mateai-mods
+claude plugin disable delegate@mateai-mods
+```
+
+### Read it before you install it
+
+The skill is one file: [`plugins/delegate/skills/delegate/SKILL.md`](plugins/delegate/skills/delegate/SKILL.md). It is plain instructions for Claude, but it makes Claude spawn subagents that edit files and run commands **with your permissions**. Read it, and try it first on a branch or a throwaway repo.
+
+### Layout
+
+```
+plugins/delegate/                    the plugin
+  .claude-plugin/plugin.json
+  skills/delegate/SKILL.md
+```
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
