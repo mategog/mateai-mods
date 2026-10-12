@@ -18,7 +18,7 @@ defeats the purpose) and ask whether to continue.
 
 ## 0. Guidelines (mandatory, for you and every subagent)
 
-Before anything else, invoke the Skill tool with `anthropic-skills:karpathy-guidelines`
+Before anything else, invoke the Skill tool with `karpathy-guidelines`
 if it is installed, and follow it throughout. If it isn't, apply the four rules below
 anyway; they are the same rules. In this workflow that means:
 
@@ -91,7 +91,7 @@ For each task, call the Agent tool with:
 - `prompt`: built from this template:
 
 ```
-FIRST: invoke the Skill tool with `anthropic-skills:karpathy-guidelines` and follow it
+FIRST: invoke the Skill tool with `karpathy-guidelines` and follow it
 for everything below. (If the Skill tool is unavailable, apply its four rules anyway:
 state assumptions and stop if unclear; minimum code, nothing speculative; touch only
 what the task requires; verify against the "Done when" check.)

@@ -114,7 +114,7 @@ It is only ever run by you typing the command; Claude will not start it on its o
 
 - Claude Code with the Agent tool (subagents). It does not work in plain chat.
 - A session running an Opus-class model. On anything else it warns you and asks before continuing.
-- Optional: the `anthropic-skills:karpathy-guidelines` and `code-review` skills. Without them it applies the same rules inline.
+- Optional: the `karpathy-guidelines` and `code-review` skills. Without them it applies the same rules inline.
 
 ### Install
 
