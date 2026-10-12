@@ -1,0 +1,5 @@
+{
+  "name": "delegate",
+  "version": "0.1.0",
+  "description": "Plan a coding task on Opus, hand the implementation to Sonnet subagents, then review and verify their work."
+}
