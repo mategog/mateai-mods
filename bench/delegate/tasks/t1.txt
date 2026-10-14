@@ -1,0 +1,1 @@
+In this repo, parseCsvLine in src/csv.js breaks on quoted fields. Fix it: a field may be wrapped in double quotes; inside quotes a comma is literal, and two double quotes ("") stand for one literal double quote. Unquoted fields are still trimmed as before. Add tests for the new cases. All tests must pass with `npm test`.

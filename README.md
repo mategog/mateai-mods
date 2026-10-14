@@ -96,7 +96,7 @@ plugins/cost-band/                   the plugin
 
 A skill, not a mod: it runs no code of its own. You run it in an Opus session. Opus researches and plans the task, then hands the implementation to Sonnet subagents and reviews what they wrote. **Experimental (v0.2.0).**
 
-Designed to cut cost by moving implementation to cheaper models. Not yet benchmarked.
+The goal is lower cost by moving implementation to cheaper models. In a first small benchmark it did **not** save cost or time; see [Benchmark](#benchmark).
 
 ```
 /delegate:delegate add pagination to the orders API and cover it with tests
@@ -111,6 +111,39 @@ It is only ever run by you typing the command; Claude will not start it on its o
 - **Picks the model per task.** Sonnet by default, Opus for subtle or high-risk tasks, Haiku only for trivial mechanical edits.
 - **Keeps subagents on a short leash.** They can't commit, push or deploy, they only run narrow checks on their own files, and they report "blocked" instead of redesigning.
 - **Reviews the result.** Opus reads every diff, checks that each subagent stayed inside its files, runs the full verification once, and uses `code-review` for risky changes. Max 2 correction rounds per task, then Opus takes over.
+
+### Benchmark
+
+Three tasks on a small Node project (`bench/delegate/fixture`, about 150 lines), each run once with plain Opus and once with `/delegate:delegate`, from the same starting commit with the same prompt. Correctness is graded by hidden tests the agent never sees. Run on 2026-10-14 with Claude Code 2.1.238 (`opus` = `claude-opus-5`, `sonnet` = `claude-sonnet-5`). Cost is Claude Code's list-price estimate (`total_cost_usd`), not a bill.
+
+| Task | Run | Delegated? | Hidden tests | Cost | Wall time | Output tokens | Total tokens |
+|---|---|---|---|---|---|---|---|
+| **T1** small: fix quoted fields in one CSV function | Opus | – | 5/5 | $0.92 | 86 s | 6.7k | 424k |
+| | /delegate | no, gate declined | 5/5 | $0.97 | 80 s | 5.9k | 506k |
+| **T2** medium: validation in 3 modules + shared error class | Opus | – | 3/3 | $0.84 | 97 s | 6.6k | 598k |
+| | /delegate | yes, 3 Sonnet subagents | 3/3 | **$2.07** (Opus $1.17 + Sonnet $0.89) | **166 s** | 18.5k | 2,039k |
+| **T3** mechanical: rename `qty` → `quantity` across 7 files | Opus | – | 4/4 | $0.96 | 159 s | 7.9k | 719k |
+| | /delegate | no, gate declined | 4/4 | $0.92 | 95 s | 7.7k | 589k |
+
+Total tokens include cache reads and writes, which are most of the volume.
+
+**What it shows**
+
+- **Same quality.** All six runs passed every hidden test.
+- **When it delegated, it cost more and was slower.** On T2 it cost 2.5× as much and took 1.7× as long for the same result. Even the Opus share alone ($1.17) was more than plain Opus doing everything ($0.84): planning, writing briefs and reviewing diffs cost more than the typing it handed off. Each subagent also starts cold, re-reading context the lead already had.
+- **When the gate declined, it matched plain Opus** (within about 5% on cost). The T3 time gap (159 s vs 95 s) comes from runs that worked the same way, so it shows run-to-run noise of about a minute; smaller time differences here mean nothing.
+- **The gate was too eager on T2.** Three independent ~40-line changes met the "2+ independent tasks" rule, but they were too small for delegation to pay off.
+
+**Limits:** one run per cell, and a tiny project, which is exactly where delegation overhead weighs most. Large codebases, where implementation is much bigger than planning, are not tested yet.
+
+To reproduce (each run is capped at $6 list price):
+
+```bash
+bench/delegate/run.sh t2 baseline
+bench/delegate/run.sh t2 delegate
+```
+
+Results land in `bench/delegate/results/`. The tasks are in `bench/delegate/tasks/` and the grading tests in `bench/delegate/hidden/`.
 
 ### Requirements
 
@@ -152,6 +185,7 @@ plugins/delegate/                    the plugin
   .claude-plugin/plugin.json
   skills/delegate/SKILL.md
   skills/karpathy-guidelines/SKILL.md
+bench/delegate/                      benchmark: fixture, tasks, hidden tests, runner, results
 ```
 
 ## License
