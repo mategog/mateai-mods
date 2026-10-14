@@ -1,0 +1,69 @@
+diff --git a/plugins/delegate/.claude-plugin/plugin.json b/plugins/delegate/.claude-plugin/plugin.json
+index b7cb0e6..02e71e6 100644
+--- a/plugins/delegate/.claude-plugin/plugin.json
++++ b/plugins/delegate/.claude-plugin/plugin.json
+@@ -1,5 +1,5 @@
+ {
+   "name": "delegate",
+-  "version": "0.2.0",
++  "version": "0.4.0-exp-a",
+   "description": "Plan a coding task on Opus, hand the implementation to Sonnet subagents, then review and verify their work. Bundles the karpathy-guidelines skill."
+ }
+diff --git a/plugins/delegate/skills/delegate/SKILL.md b/plugins/delegate/skills/delegate/SKILL.md
+index 38e30b5..0978ba9 100644
+--- a/plugins/delegate/skills/delegate/SKILL.md
++++ b/plugins/delegate/skills/delegate/SKILL.md
+@@ -88,21 +88,29 @@ For each task, call the Agent tool with:
+ FIRST: invoke the Skill tool with `karpathy-guidelines` and follow it for everything
+ below.
+ 
+-You are implementing one part of a larger change in <repo path>.
++You are implementing one part of a larger change in <repo path>. This brief is
++self-contained: everything you need is below. Do not explore the repo, list
++directories, or read files that are not named under "Read only". Aim to finish in at
++most 5 tool calls: write or edit your files, run the "Done when" check, fix only if
++it fails, then report.
+ 
+ Goal: <what this task achieves and why>
+ 
+ Files you may edit: <exact paths>. Do not edit anything else.
+ Already modified by the user, leave alone unless listed above: <files from git status>.
+ 
+-Context:
+-- <key findings: relevant functions/types as path:line refs — you can read them>
+-- <the existing pattern to copy: path to an example; paste a snippet only if short>
+-- <shared interfaces/signatures this task depends on, verbatim>
+-- <constraints: style, libraries to use/avoid>
++Spec (verbatim from the request, only the part for this task):
++<the exact requirement text for this chunk>
+ 
+-Steps:
+-1. ...
++Code you need (verbatim):
++- <signature and import path of every existing helper this task calls>
++- <shared interfaces/signatures this task depends on>
++- <the full current content of each existing file this task edits, if under ~80
++  lines; otherwise the exact lines to change>
++
++Conventions: <a short verbatim example of an existing test file's imports and style>
++
++Read only (if anything): <paths, only where pasting is impractical>
+ 
+ Done when: <narrow, file-scoped check: targeted test, lint or typecheck of your files>
+ passes. Do NOT run the full test suite, package-wide typecheck/lint, or full build —
+@@ -118,9 +126,12 @@ Report (terse, no narrative): files changed; verification pass/fail with the key
+ failing line if any; open questions. Nothing else.
+ ```
+ 
+-Brief economics: your output tokens are the expensive ones. Paste only what is small
+-and critical (interfaces, shared types, a short pattern snippet). For everything else
+-give paths with line numbers and let the subagent read them — its reading is cheap.
++Brief economics: a subagent's cost is driven by how many tool calls it makes, because
++every call re-reads its whole context. A brief that already contains everything lets it
++finish in a few calls. So paste what it needs verbatim (its spec section, helper
++signatures, small files it edits, a test-style example) instead of pointing at paths.
++Keep each brief under ~1,500 words; a chunk that needs more is too big or too coupled
++to delegate.
+ 
+ Launch independent tasks in the same message so they run in parallel. Wait for a
+ task's notification before launching tasks that depend on it.
