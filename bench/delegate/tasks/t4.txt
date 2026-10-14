@@ -1,0 +1,36 @@
+Add six new modules to this repo, each with its own test file in test/. All tests must pass with `npm test`. Use existing helpers where they fit (formatMoney in src/money.js, lineTotal in src/orders.js). Order lines look like { sku, qty, priceCents }.
+
+1. src/tax.js
+   - `TAX_RATES`: exported object { 'US-CA': 0.0725, 'US-NY': 0.04, 'DE': 0.19, 'HU': 0.27 }.
+   - `regions()`: the region codes, sorted alphabetically.
+   - `calculateTax(lines, region)`: returns { rate, taxCents }, where taxCents is the sum over lines of Math.round(lineTotal(line) * rate). Throws an Error with message `Unknown region: <region>` for an unknown region.
+
+2. src/coupons.js
+   - `applyCoupon(subtotalCents, coupon, now = new Date())`, where coupon = { code, type: 'percent' | 'fixed', value, minSubtotalCents?, expiresAt? (ISO date string) }. Returns { applied, reason, discountCents, totalCents }.
+   - A percent coupon whose value is outside 0..100 throws a RangeError (check this first).
+   - If expiresAt is set and now is after it: applied false, reason 'expired', discountCents 0.
+   - Else if minSubtotalCents is set and subtotalCents is below it: applied false, reason 'below-minimum', discountCents 0.
+   - Else applied true, reason null. Percent: discountCents = Math.round(subtotalCents * value / 100). Fixed: discountCents = Math.min(value, subtotalCents).
+   - totalCents = subtotalCents - discountCents.
+
+3. src/returns.js
+   - `refundCents(line, returnedQty, daysSincePurchase)`: base = line.priceCents * returnedQty. Full base up to and including day 30, Math.round(base * 0.5) for days 31 to 60, 0 after day 60. Throws a RangeError if returnedQty is not a positive integer or exceeds line.qty.
+   - `summarizeRefunds(refunds)`: refunds is an array of { sku, refundCents }. Returns { count, totalRefundCents, bySku }, where bySku maps each sku to the sum of its refundCents.
+
+4. src/invoice.js
+   - `renderInvoice({ number, customer, lines, discountCents = 0, taxCents = 0 })` returns a string made of these lines joined by '\n', with no trailing newline:
+     `INVOICE <number>`
+     `Bill to: <customer.name> <<customer.email>>`
+     one line per order line: `<sku> x<qty> @ <formatMoney(priceCents)> = <formatMoney(lineTotal(line))>`
+     `Subtotal: <formatMoney(subtotal)>`
+     `Discount: -<formatMoney(discountCents)>` (only when discountCents > 0)
+     `Tax: <formatMoney(taxCents)>`
+     `Total: <formatMoney(subtotal - discountCents + taxCents)>`
+
+5. src/loyalty.js
+   - `pointsForOrder(totalCents, tier)`: base = Math.floor(totalCents / 100); 'bronze' x1, 'silver' x1.5, 'gold' x2, result rounded down to an integer. An unknown tier throws an Error.
+   - `tierFor(points)`: below 1000 is 'bronze', below 5000 is 'silver', otherwise 'gold'.
+   - `redeem(balance, points)`: returns balance - points. Throws a RangeError if points is not a positive integer or exceeds balance.
+
+6. src/export.js
+   - `ordersToCsv(orders)`, where orders = [{ id, customerEmail, lines }]. Returns CSV text: the header `order_id,customer_email,sku,qty,price_cents,line_total_cents`, then one row per order line, rows joined by '\n' with a trailing '\n'. A field that contains a comma, a double quote or a newline is wrapped in double quotes, with inner double quotes doubled.

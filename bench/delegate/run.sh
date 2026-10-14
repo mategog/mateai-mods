@@ -1,10 +1,12 @@
 #!/bin/bash
 # Runs one benchmark cell and grades it.
-# usage: run.sh <task t1|t2|t3> <cond baseline|delegate> [rep]
-# Needs: claude CLI (logged in), node, git, python3. Each run is capped at $6 list price.
+# usage: run.sh <task t1..t5> <cond> [rep]
+#   cond "baseline" = plain Opus; any other label runs /delegate:delegate with the plugin in
+#   $DELEGATE_PLUGIN (default: this repo's plugins/delegate), e.g. DELEGATE_PLUGIN=/path/v020 run.sh t4 v020
+# Needs: claude CLI (logged in), node, git, python3. Each run is capped at $12 list price.
 set -u
 B="$(cd "$(dirname "$0")" && pwd)"
-PLUGIN="$B/../../plugins/delegate"
+PLUGIN="${DELEGATE_PLUGIN:-$B/../../plugins/delegate}"
 RUNS="${BENCH_RUNS:-${TMPDIR:-/tmp}/delegate-bench-runs}"   # outside the repo, so runs can't see hidden/
 T="$1"; C="$2"; R="${3:-1}"
 ID="$T-$C-$R"
@@ -13,9 +15,9 @@ mkdir -p "$RUNS" "$B/results"
 rm -rf "$D"; cp -R "$B/fixture" "$D"
 cd "$D" && git init -q && git add -A && git -c user.name=bench -c user.email=bench@local commit -qm init
 TASK="$(cat "$B/tasks/$T.txt")"
-ARGS=(--model opus --output-format json --permission-mode acceptEdits --no-session-persistence --max-budget-usd 6
+ARGS=(--model opus --output-format json --permission-mode acceptEdits --no-session-persistence --max-budget-usd 12
   --allowedTools "Bash(npm test:*)" "Bash(npm test)" "Bash(node --test:*)" "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(ls:*)")
-if [ "$C" = delegate ]; then
+if [ "$C" != baseline ]; then
   PROMPT="/delegate:delegate $TASK"; ARGS+=(--plugin-dir "$PLUGIN")
 else
   PROMPT="$TASK"

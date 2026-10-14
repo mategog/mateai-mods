@@ -1,0 +1,60 @@
+{
+ "id": "t4-v030-1",
+ "exit": 0,
+ "wall_s": 154.5,
+ "visible_tests": "tests=42 pass=42 fail=0",
+ "hidden_tests": "tests=6 pass=6 fail=0",
+ "diff": "12 files changed, 437 insertions(+)",
+ "total_cost_usd": 1.1134130000000002,
+ "duration_ms": 151123,
+ "num_turns": 19,
+ "is_error": false,
+ "subtype": "success",
+ "usage": {
+  "input_tokens": 14,
+  "cache_creation_input_tokens": 54323,
+  "cache_read_input_tokens": 390826,
+  "output_tokens": 14988,
+  "output_tokens_details": {
+   "thinking_tokens": 4297
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 54323,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 863,
+    "cache_read_input_tokens": 73610,
+    "cache_creation_input_tokens": 270,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 270
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "modelUsage": {
+  "claude-opus-5": {
+   "inputTokens": 14,
+   "outputTokens": 14988,
+   "cacheReadInputTokens": 390826,
+   "cacheCreationInputTokens": 54323,
+   "webSearchRequests": 0,
+   "costUSD": 1.1134130000000002,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "canonicalModel": "claude-opus-5",
+   "provider": "firstParty"
+  }
+ }
+}

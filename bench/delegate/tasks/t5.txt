@@ -1,0 +1,14 @@
+Introduce a Money value type and use it for every computed amount in this repo.
+
+1. In src/money.js add and export `class Money`:
+   - `Money.fromCents(n)`: n must be an integer, otherwise throw a RangeError.
+   - a `cents` getter returning the integer amount.
+   - `add(other)` and `subtract(other)` return a new Money.
+   - `multiply(factor)` returns a new Money of Math.round(cents * factor).
+   - `percent(p)` returns a new Money of Math.round(cents * p / 100).
+   - `equals(other)` is true when the cents are equal.
+   - `toString()` returns the same text as formatMoney(cents).
+   Money instances are immutable (frozen). Keep formatMoney(cents) working exactly as it does now.
+2. Make these return Money instead of a number: lineTotal and orderTotal (src/orders.js), bulkDiscount (src/discounts.js) and shippingCost (src/shipping.js). Their inputs stay the same: order lines keep priceCents as an integer.
+3. summarize (src/report.js) returns subtotal, discount, shipping and total as Money; units and display stay as they are.
+4. Update the existing tests and add tests for Money. All tests must pass with `npm test`.
