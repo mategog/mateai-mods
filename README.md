@@ -94,7 +94,7 @@ plugins/cost-band/                   the plugin
 
 ## delegate
 
-A skill, not a mod: it runs no code of its own. You run it in an Opus session. Opus researches and plans the task, then hands the implementation to Sonnet subagents and reviews what they wrote. **Experimental (v0.2.0).**
+A skill, not a mod: it runs no code of its own. You run it in an Opus session. Opus researches and plans the task, then hands the implementation to Sonnet subagents and reviews what they wrote. **Experimental (v0.3.0).**
 
 The goal is lower cost by moving implementation to cheaper models. In our benchmark it **never beat plain Opus**: when it delegated, it cost 1.7–2.5× as much and saved no time; when it chose not to delegate, it matched plain Opus. See [Benchmark](#benchmark).
 
