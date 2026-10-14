@@ -1,6 +1,6 @@
 # mateai-mods
 
-Small Claude Code mods and skills from the [MateAI](https://www.youtube.com/@cryptomate9259) channel.
+Small Claude Code mods and skills from the [MateAI]
 
 ## Plugins
 
