@@ -18,9 +18,9 @@ defeats the purpose) and ask whether to continue.
 
 ## 0. Guidelines (mandatory, for you and every subagent)
 
-Before anything else, invoke the Skill tool with `karpathy-guidelines`
-if it is installed, and follow it throughout. If it isn't, apply the four rules below
-anyway; they are the same rules. In this workflow that means:
+Before anything else, invoke the Skill tool with `karpathy-guidelines` (bundled with
+this plugin) and follow it throughout. If it can't be loaded, apply the four rules
+below anyway; they are the same rules. In this workflow that means:
 
 - **Think before coding:** surface assumptions and competing interpretations to the
   user *before* spawning anyone (subagents can't ask).

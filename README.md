@@ -114,7 +114,7 @@ It is only ever run by you typing the command; Claude will not start it on its o
 
 - Claude Code with the Agent tool (subagents). It does not work in plain chat.
 - A session running an Opus-class model. On anything else it warns you and asks before continuing.
-- Optional: the `karpathy-guidelines` and `code-review` skills. Without them it applies the same rules inline.
+- Nothing else to install: the `karpathy-guidelines` skill it relies on is bundled in this plugin. It also uses the `code-review` skill for risky changes when you have it; without it, Opus reviews the diff itself.
 
 ### Install
 
@@ -141,7 +141,7 @@ claude plugin disable delegate@mateai-mods
 
 ### Read it before you install it
 
-The skill is one file: [`plugins/delegate/skills/delegate/SKILL.md`](plugins/delegate/skills/delegate/SKILL.md). It is plain instructions for Claude, but it makes Claude spawn subagents that edit files and run commands **with your permissions**. Read it, and try it first on a branch or a throwaway repo.
+The plugin is two plain-text skill files: [`delegate`](plugins/delegate/skills/delegate/SKILL.md) and the bundled [`karpathy-guidelines`](plugins/delegate/skills/karpathy-guidelines/SKILL.md) (a short, independent write-up of four coding rules, not affiliated with Andrej Karpathy). They are plain instructions for Claude, but it makes Claude spawn subagents that edit files and run commands **with your permissions**. Read it, and try it first on a branch or a throwaway repo.
 
 ### Layout
 
@@ -149,6 +149,7 @@ The skill is one file: [`plugins/delegate/skills/delegate/SKILL.md`](plugins/del
 plugins/delegate/                    the plugin
   .claude-plugin/plugin.json
   skills/delegate/SKILL.md
+  skills/karpathy-guidelines/SKILL.md
 ```
 
 ## License
