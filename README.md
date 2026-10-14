@@ -94,7 +94,9 @@ plugins/cost-band/                   the plugin
 
 ## delegate
 
-A skill, not a mod: it runs no code of its own. You run it in an Opus session. Opus researches and plans the task, then hands the implementation to Sonnet subagents and reviews what they wrote. **Experimental (v0.1.0).**
+A skill, not a mod: it runs no code of its own. You run it in an Opus session. Opus researches and plans the task, then hands the implementation to Sonnet subagents and reviews what they wrote. **Experimental (v0.2.0).**
+
+Designed to cut cost by moving implementation to cheaper models. Not yet benchmarked.
 
 ```
 /delegate:delegate add pagination to the orders API and cover it with tests
