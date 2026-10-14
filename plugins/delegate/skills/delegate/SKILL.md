@@ -39,12 +39,19 @@ template in step 4). Never skip this for a "simple" task.
 
 ## 2. Decide: delegate or just do it
 
-Delegate only if at least one holds:
-- 2+ tasks that can run independently (disjoint files), or
-- one bulk mechanical task (many files, one pattern).
+Default: do it yourself. Delegation has a fixed overhead (briefs, subagents that start
+cold, review). In this plugin's benchmark, delegating three independent ~40-line
+changes cost 2.5× as much and took 1.7× as long as doing them directly.
 
-Otherwise do the work yourself and tell the user why you didn't delegate. Spawning
-costs more than it saves on small or tightly coupled changes.
+Delegate only if all of these hold:
+- **The implementation is large:** roughly 500+ changed lines or 10+ files.
+- **It splits into independent chunks** (disjoint files) that are each substantial on
+  their own: roughly 100+ lines or several files. Merge smaller chunks, or keep them.
+- **You can brief each chunk precisely** without the subagent having to rediscover
+  what you already learned.
+
+Otherwise do the work yourself and tell the user in one line why you didn't delegate.
+When unsure, don't delegate.
 
 ## 3. Plan (you)
 
@@ -80,7 +87,8 @@ For each task, call the Agent tool with:
 
 - `model`: the model you chose for that task (`"sonnet"` by default; `"haiku"` or
   `"opus"` per step 3)
-- `subagent_type: "general-purpose"`
+- `subagent_type: "delegate:implementer"` (this plugin's lean implementer agent, which
+  has only the tools it needs; fall back to `"general-purpose"` only if it is unavailable)
 - `description`: 3–5 words
 - `prompt`: built from this template:
 

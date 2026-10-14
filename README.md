@@ -106,10 +106,10 @@ It is only ever run by you typing the command; Claude will not start it on its o
 
 ### What it does
 
-- **Decides whether to delegate at all.** It delegates only for 2+ independent tasks or one bulk mechanical change. Otherwise Opus does the work itself and says why.
+- **Decides whether to delegate at all.** It delegates only when the work is large (roughly 500+ changed lines or 10+ files) and splits into independent chunks that are each substantial. Otherwise Opus does the work itself and says why.
 - **Plans before spawning.** Each task gets an exact file list and a verification command. Shared interfaces are written first so parallel agents don't guess each other's signatures. At most 5 subagents.
 - **Picks the model per task.** Sonnet by default, Opus for subtle or high-risk tasks, Haiku only for trivial mechanical edits.
-- **Keeps subagents on a short leash.** They can't commit, push or deploy, they only run narrow checks on their own files, and they report "blocked" instead of redesigning.
+- **Keeps subagents on a short leash.** They run as a lean `implementer` agent with only Read, Write, Edit, Bash and Skill, which makes each one cheaper to start. They can't commit, push or deploy, they only run narrow checks on their own files, and they report "blocked" instead of redesigning.
 - **Reviews the result.** Opus reads every diff, checks that each subagent stayed inside its files, runs the full verification once, and uses `code-review` for risky changes. Max 2 correction rounds per task, then Opus takes over.
 
 ### Benchmark
@@ -210,13 +210,14 @@ claude plugin disable delegate@mateai-mods
 
 ### Read it before you install it
 
-The plugin is two plain-text skill files: [`delegate`](plugins/delegate/skills/delegate/SKILL.md) and the bundled [`karpathy-guidelines`](plugins/delegate/skills/karpathy-guidelines/SKILL.md) (a short, independent write-up of four coding rules, not affiliated with Andrej Karpathy). They are plain instructions for Claude, but it makes Claude spawn subagents that edit files and run commands **with your permissions**. Read it, and try it first on a branch or a throwaway repo.
+The plugin is three plain-text files: the [`delegate`](plugins/delegate/skills/delegate/SKILL.md) skill, the bundled [`karpathy-guidelines`](plugins/delegate/skills/karpathy-guidelines/SKILL.md) skill (a short, independent write-up of four coding rules, not affiliated with Andrej Karpathy), and the [`implementer`](plugins/delegate/agents/implementer.md) subagent definition. They are plain instructions for Claude, but it makes Claude spawn subagents that edit files and run commands **with your permissions**. Read it, and try it first on a branch or a throwaway repo.
 
 ### Layout
 
 ```
 plugins/delegate/                    the plugin
   .claude-plugin/plugin.json
+  agents/implementer.md
   skills/delegate/SKILL.md
   skills/karpathy-guidelines/SKILL.md
 bench/delegate/                      benchmark: fixture, tasks, hidden tests, runner, results
