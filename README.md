@@ -104,7 +104,7 @@ It is only ever run by you typing the command; Claude will not start it on its o
 
 ### What it does
 
-- **Decides whether to delegate at all.** It delegates only for 2+ independent tasks or one bulk mechanical change. Otherwise Opus does the work itself and says why.
+- **Decides whether to delegate at all.** It delegates only when the work is large (roughly 500+ changed lines or 10+ files) and splits into independent chunks that are each substantial. Otherwise Opus does the work itself and says why.
 - **Plans before spawning.** Each task gets an exact file list and a verification command. Shared interfaces are written first so parallel agents don't guess each other's signatures. At most 5 subagents.
 - **Picks the model per task.** Sonnet by default, Opus for subtle or high-risk tasks, Haiku only for trivial mechanical edits.
 - **Keeps subagents on a short leash.** They can't commit, push or deploy, they only run narrow checks on their own files, and they report "blocked" instead of redesigning.
