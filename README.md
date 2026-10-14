@@ -96,7 +96,7 @@ plugins/cost-band/                   the plugin
 
 A skill, not a mod: it runs no code of its own. You run it in an Opus session. Opus researches and plans the task, then hands the implementation to Sonnet subagents and reviews what they wrote. **Experimental (v0.2.0).**
 
-The goal is lower cost by moving implementation to cheaper models. In our benchmark it **never beat plain Opus**: when it delegated, it cost about 2× as much and saved no time; when it chose not to delegate, it matched plain Opus. See [Benchmark](#benchmark).
+The goal is lower cost by moving implementation to cheaper models. In our benchmark it **never beat plain Opus**: when it delegated, it cost 1.7–2.5× as much and saved no time; when it chose not to delegate, it matched plain Opus. See [Benchmark](#benchmark).
 
 ```
 /delegate:delegate add pagination to the orders API and cover it with tests
@@ -114,7 +114,7 @@ It is only ever run by you typing the command; Claude will not start it on its o
 
 ### Benchmark
 
-Five tasks on a small Node project (`bench/delegate/fixture`, about 150 lines), each started from the same commit with the same prompt. Correctness is graded by hidden tests the agent never sees. Run on 2026-10-14 with Claude Code 2.1.238 (`opus` = `claude-opus-5`, `sonnet` = `claude-sonnet-5`), one run per cell. Cost is Claude Code's list-price estimate (`total_cost_usd`), not a bill.
+Five tasks on a small Node project (`bench/delegate/fixture`, about 150 lines), each started from the same commit with the same prompt. Correctness is graded by hidden tests the agent never sees. Run on 2026-10-14 with Claude Code 2.1.238 (`opus` = `claude-opus-5`, `sonnet` = `claude-sonnet-5`), one run per cell unless noted. Cost is Claude Code's list-price estimate (`total_cost_usd`), not a bill.
 
 Two versions of the delegation rule are compared:
 - **v0.2.0** delegates for "2+ independent tasks, or one bulk mechanical change".
@@ -142,16 +142,33 @@ Two versions of the delegation rule are compared:
 | | v0.2.0 | no, too coupled | 2/2 | $0.99 | 113 s | 9.7k | 605k |
 | | v0.3.0 | no | 2/2 | $0.96 | 120 s | 10.0k | 488k |
 
+**Round 3: self-contained briefs** (experimental variants that keep v0.2.0's rule, so they still delegate; patches against v0.2.0 in `bench/delegate/variants/`)
+- **v0.4a**: each brief carries its spec section, helper signatures, the small files it edits and a test-style example verbatim; subagents are told not to explore and to finish in about 5 tool calls.
+- **v0.4b**: v0.4a plus a lean `implementer` subagent that only has Read, Write, Edit, Bash and Skill.
+
+| Task | Run | Delegated? | Hidden tests | Cost | Wall time | Subagent tool calls | Total tokens |
+|---|---|---|---|---|---|---|---|
+| **T4** six new feature modules | Opus, 2nd run | – | 6/6 | $1.02 | 130 s | – | 463k |
+| | v0.2.0, 2nd run | yes, 3 Sonnet subagents | 6/6 | $2.43 (Opus $1.50 + Sonnet $0.93) | 212 s | 33 | 2,028k |
+| | v0.4a | yes, 3 Sonnet subagents | 6/6 | $2.14 (Opus $1.28 + Sonnet $0.86) | 155 s | 20 | 1,741k |
+| | v0.4b | yes, 3 lean subagents | 6/6 | **$1.88** (Opus $1.35 + Sonnet $0.53) | 151 s | 19 | 1,315k |
+| **T2** validation in 3 modules | v0.4a | no | 3/3 | $0.84 | 89 s | – | 476k |
+| | v0.4b | no | 3/3 | $0.81 | 90 s | – | 412k |
+
 Total tokens include cache reads and writes, which are most of the volume.
 
 **What it shows**
 
-- **Same quality.** All 12 runs passed every hidden test.
-- **Delegating never paid off.** Both times it delegated (T2, T4) it cost about 2× as much (2.5× and 1.9×) and saved no time. Even on T4, twelve independent files split across three parallel subagents finished no faster than Opus alone: planning, briefing and review took as long as the parallel typing saved.
+- **Same quality.** All 18 runs passed every hidden test.
+- **Delegating never paid off.** Every run that delegated cost 1.7–2.5× as much as plain Opus and saved no time. Even on T4, twelve independent files split across three parallel subagents finished no faster than Opus alone: planning, briefing and review took as long as the parallel typing saved.
 - **Why: the cost is context, not typing.** Plain Opus wrote all of T4 with 17k output tokens; most of its 478k tokens were cache reads of context it already had. Every subagent starts cold and builds its own context, so T4 with delegation processed 1.9M tokens. Sonnet's lower price doesn't make up for four times the volume.
 - **v0.3.0's tighter rule avoided both losing cases.** It declined everything here and stayed within about 5% of plain Opus on cost. Time differences of about a minute are noise: T3 shows a 64 s gap between two runs that did the same thing.
+- **Self-contained briefs cut subagent tool calls by 40% (33 → 20) but Sonnet cost by only 7%.** Each call still re-reads the subagent's full system prompt and tool definitions.
+- **The lean subagent is what cut subagent cost: −43%** ($0.93 → $0.53, cache reads 980k → 332k).
+- **It still lost, because of the lead.** The Opus lead alone ($1.28–1.50) cost more than plain Opus doing the whole task ($1.02–1.16): loading the skill, planning, writing about 14,000 characters of briefs and reviewing three diffs all re-read a growing context. No brief format fixes that part.
+- **On T2 both variants chose not to delegate**, reasoning that a fully self-contained brief for ~50 lines would contain essentially the final code.
 
-**Limits:** one run per cell, a small project, and tasks of at most ~450 changed lines. Delegation might pay off on much larger work (thousands of lines of mostly new code); that is not tested.
+**Limits:** mostly one run per cell, a small project, and tasks of at most ~450 changed lines. Delegation might pay off on much larger work (thousands of lines of mostly new code); that is not tested.
 
 To reproduce (each run is capped at $12 list price):
 
@@ -160,7 +177,7 @@ bench/delegate/run.sh t4 baseline
 bench/delegate/run.sh t4 delegate
 ```
 
-To test another version of the plugin, point `DELEGATE_PLUGIN` at its `plugins/delegate` folder and give the run a label, e.g. `DELEGATE_PLUGIN=/path/to/plugins/delegate bench/delegate/run.sh t4 v020`. Results land in `bench/delegate/results/`. The tasks are in `bench/delegate/tasks/` and the grading tests in `bench/delegate/hidden/`.
+To test another version of the plugin, point `DELEGATE_PLUGIN` at its `plugins/delegate` folder and give the run a label, e.g. `DELEGATE_PLUGIN=/path/to/plugins/delegate bench/delegate/run.sh t4 v020`. For the Round 3 variants, apply a patch from `bench/delegate/variants/` (with `git apply`) to a copy of the v0.2.0 plugin and point `DELEGATE_PLUGIN` at that copy. Results land in `bench/delegate/results/`. The tasks are in `bench/delegate/tasks/` and the grading tests in `bench/delegate/hidden/`.
 
 ### Requirements
 
