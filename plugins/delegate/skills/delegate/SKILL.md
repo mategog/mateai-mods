@@ -19,15 +19,9 @@ defeats the purpose) and ask whether to continue.
 ## 0. Guidelines (mandatory, for you and every subagent)
 
 Before anything else, invoke the Skill tool with `karpathy-guidelines` (bundled with
-this plugin) and follow it throughout. If it can't be loaded, apply the four rules
-below anyway; they are the same rules. In this workflow that means:
-
-- **Think before coding:** surface assumptions and competing interpretations to the
-  user *before* spawning anyone (subagents can't ask).
-- **Simplicity:** design tasks that need the minimum code — no speculative scope.
-- **Surgical changes:** every task's file list and steps must trace to the request;
-  flag unrelated problems in the final report instead of assigning them.
-- **Goal-driven:** every task has a verifiable "done when" check.
+this plugin) and follow it throughout. As lead, apply it to the plan: settle
+assumptions with the user before spawning (subagents can't ask), and keep every task
+scoped to the request with a verifiable "done when" check.
 
 Every subagent brief must also make the subagent invoke this skill first (see the
 template in step 4). Never skip this for a "simple" task.
@@ -91,10 +85,8 @@ For each task, call the Agent tool with:
 - `prompt`: built from this template:
 
 ```
-FIRST: invoke the Skill tool with `karpathy-guidelines` and follow it
-for everything below. (If the Skill tool is unavailable, apply its four rules anyway:
-state assumptions and stop if unclear; minimum code, nothing speculative; touch only
-what the task requires; verify against the "Done when" check.)
+FIRST: invoke the Skill tool with `karpathy-guidelines` and follow it for everything
+below.
 
 You are implementing one part of a larger change in <repo path>.
 
