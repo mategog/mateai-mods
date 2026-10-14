@@ -87,7 +87,8 @@ For each task, call the Agent tool with:
 
 - `model`: the model you chose for that task (`"sonnet"` by default; `"haiku"` or
   `"opus"` per step 3)
-- `subagent_type: "general-purpose"`
+- `subagent_type: "delegate:implementer"` (this plugin's lean implementer agent, which
+  has only the tools it needs; fall back to `"general-purpose"` only if it is unavailable)
 - `description`: 3–5 words
 - `prompt`: built from this template:
 
